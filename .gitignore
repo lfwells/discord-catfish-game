@@ -1,0 +1,13 @@
+token.txt
+service-account.js
+
+*firebase-adminsdk*
+node_modules
+users.js
+.vscode/sftp.json
+.vscode/sftp.json
+~*.docx
+~*.tmp
+.DS_Store
+.vscode/sftp.json
+*_oauth*.js
