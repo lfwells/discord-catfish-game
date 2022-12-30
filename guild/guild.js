@@ -13,15 +13,18 @@ export default async function init(client)
   //store them in the db
   await Promise.all(guilds.map( async (guild) => 
   { 
-    //load guild info
-    await guild.fetch();
-    (await guildsCollection.doc(guild.id)).set({    
-      name:guild.name
-    }, {merge:true}); 
+    if (client.isMain)
+    {
+      //load guild info
+      await guild.fetch();
+      (await guildsCollection.doc(guild.id)).set({    
+        name:guild.name
+      }, {merge:true}); 
 
-    //cache the info (reduce firebase reads)
-    GUILD_CACHE[guild.id] = guild;//{}
-    
+      //cache the info (reduce firebase reads)
+      GUILD_CACHE[guild.id] = guild;//{}
+    }
+      
     //wipe all the commands (they get generated again by the init functions)
     await unregisterAllCommandsIfNecessary(guild);
     
@@ -31,7 +34,7 @@ export default async function init(client)
     console.log("Initialised Guild",guild.name, guild.id);
   })
   );;
-  console.log("Done awaiting all guilds"); 
+  //console.log("Done awaiting all guilds"); 
 }
 
 
