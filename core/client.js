@@ -2,7 +2,7 @@ import { Client, Intents } from 'discord.js';
 import * as botTokens from '../bot_tokens.js';
 import init_guilds from "../guild/guild.js";
 
-function createClient(botInfo, isMain)
+function createClient(botInfo)
 {
     let client = new Client({ 
         intents: [ 
@@ -19,7 +19,6 @@ function createClient(botInfo, isMain)
         fetchAllMembers: true,
     });
     client.botInfo = botInfo;
-    client.isMain = isMain ?? false;
 
     client.on('ready', async () => 
     {
@@ -39,7 +38,7 @@ let client = null;
 let playerClients = [];
 export async function loginAllClients()
 {
-    client = createClient(botTokens.MAIN_TOKEN, true);
+    client = createClient(botTokens.MAIN_TOKEN);
     playerClients = botTokens.TOKENS.map(createClient);
     await loginClient(getClient());
     for (var i = 0; i < playerClients.length; i++)
@@ -68,11 +67,15 @@ async function loginClient(client)
 } 
 
 
-
 export function getClient() { return client };
 export function getPlayerClient(playerID) { return playerClients[playerID]; }
+export function isMainClient(client)
+{
+    return client.application.id == getClient().application.id;
+}
 
 import { init_application_commands, init_interaction_cache } from '../guild/commands.js';
+import { init_game_manager } from '../game-manager/game-manager.js';
 //import { createOAuthLink } from './login.js';
 
 export async function init_client(client)
@@ -86,6 +89,7 @@ export async function init_client(client)
     
     //FLAG: init components here
     //console.log("\tInit X...");await init_X(client);
+    if (isMainClient(client)) { console.log("\tInit Game Manager...");await init_game_manager(client); }
 
     console.log("\tEnd init_client.");
 

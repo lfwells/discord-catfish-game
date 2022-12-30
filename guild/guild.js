@@ -4,6 +4,7 @@ import { guildsCollection } from "../core/database.js";
 
 import { getClient } from "../core/client.js";
 import { unregisterAllCommandsIfNecessary } from "./commands.js";
+import { init_game_manager } from "../game-manager/game-manager.js";
 
 export var GUILD_CACHE = {}; //because querying the db every min is bad (cannot cache on node js firebase it seems)
 
@@ -13,30 +14,34 @@ export default async function init(client)
   //store them in the db
   await Promise.all(guilds.map( async (guild) => 
   { 
-    if (client.isMain)
-    {
-      //load guild info
-      await guild.fetch();
-      (await guildsCollection.doc(guild.id)).set({    
-        name:guild.name
-      }, {merge:true}); 
-
-      //cache the info (reduce firebase reads)
-      GUILD_CACHE[guild.id] = guild;//{}
-    }
-      
-    //wipe all the commands (they get generated again by the init functions)
-    await unregisterAllCommandsIfNecessary(guild);
-    
-    //FLAG: run per-guild init functions
-    //await init_X(guild);
-
-    console.log("Initialised Guild",guild.name, guild.id);
+    await init_guild(guild);
   })
   );;
   //console.log("Done awaiting all guilds"); 
 }
 
+export async function init_guild(guild)
+{
+  if (guild.client.isMain)
+  {
+    //load guild info
+    await guild.fetch();
+    (await guildsCollection.doc(guild.id)).set({    
+      name:guild.name
+    }, {merge:true}); 
+
+    //cache the info (reduce firebase reads)
+    GUILD_CACHE[guild.id] = guild;//{}
+  }
+    
+  //wipe all the commands (they get generated again by the init functions)
+  await unregisterAllCommandsIfNecessary(guild);
+  
+  //FLAG: run per-guild init functions
+  //await init_X(guild);
+
+  console.log("Initialised Guild",guild.name, guild.id);
+}
 
 
 
