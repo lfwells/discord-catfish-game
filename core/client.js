@@ -77,17 +77,17 @@ import { init_application_commands, init_interaction_cache } from '../guild/comm
 
 export async function init_client(client)
 {
-    console.log("Begin init_client...");
+    console.log("\tBegin init_client...");
     client.removeAllListeners();
 
 	//register the appropriate discord event listeners
-    console.log("Init Interaction Cache");      await init_interaction_cache(client);
-    console.log("Init Application Commands...");await init_application_commands(client);
+    console.log("\tInit Interaction Cache");      await init_interaction_cache(client);
+    console.log("\tInit Application Commands...");await init_application_commands(client);
     
     //FLAG: init components here
-    //console.log("Init X...");await init_X(client);
+    //console.log("\tInit X...");await init_X(client);
 
-    console.log("End init_client.");
+    console.log("\tEnd init_client.");
 
     //createOAuthLink();
 }
