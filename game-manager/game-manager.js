@@ -13,8 +13,12 @@ async function onJoin(guild)
     await init_guild(guild);
 
     //send an intro message!
-    let channel = guild.systemChannel;
-    await channel.send({
+    await sendGameManagerMessage({
         content: "Yay! Let's get started!\n\nTo play properly, you'll need to add the extra bots that make the game work:\n"+botTokens.TOKENS.map(botInfo => botInfo.oauth).join("\n"),
-    })
+    }, guild.systemChannel);
+}
+
+export async function sendGameManagerMessage(msg, channel)
+{
+    await channel.send(msg)
 }

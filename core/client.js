@@ -73,25 +73,30 @@ export function isMainClient(client)
 {
     return client.application.id == getClient().application.id;
 }
+export function getPlayerNumber(client)
+{
+    return playerClients.findIndex(c => client.application.id == c.application?.id) + 1;
+}
 
 import { init_application_commands, init_interaction_cache } from '../guild/commands.js';
 import { init_game_manager } from '../game-manager/game-manager.js';
+import { init_game_player } from '../game-player/game-player.js';
 //import { createOAuthLink } from './login.js';
 
 export async function init_client(client)
 {
-    console.log("\tBegin init_client...");
+    console.log("\tBegin init_client...", getPlayerNumber(client));
     client.removeAllListeners();
 
 	//register the appropriate discord event listeners
-    console.log("\tInit Interaction Cache");      await init_interaction_cache(client);
+    console.log("\tInit Interaction Cache...");   await init_interaction_cache(client);
     console.log("\tInit Application Commands...");await init_application_commands(client);
     
     //FLAG: init components here
     //console.log("\tInit X...");await init_X(client);
     if (isMainClient(client)) { console.log("\tInit Game Manager...");await init_game_manager(client); }
-
-    console.log("\tEnd init_client.");
+    else { console.log("\tInit Game Player...");await init_game_player(client); }
+    console.log("\tEnd init_client. ", getPlayerNumber(client));
 
     //createOAuthLink();
 }
