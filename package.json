@@ -29,6 +29,7 @@
     "cors": "^2.8.5",
     "discord-oauth2": "^2.7.1",
     "discord.js": "^13.5.1",
+    "dotenv": "^16.0.3",
     "ejs": "^3.1.6",
     "emoji": "npm:emoji.json@^13.1.0",
     "emoji.json": "^13.1.0",

@@ -2,10 +2,9 @@ import admin from "firebase-admin";
 
 import { guildsCollection } from "../core/database.js";
 
-import { getClient } from "../core/client.js";
+import { getClient, getPlayerClient, getPlayerClients } from "../core/client.js";
 import { unregisterAllCommandsIfNecessary } from "./commands.js";
-import { init_roles } from "../roles/roles.js";
-import { init_events } from "../events/events.js";
+import { init_game_manager } from "../game-manager/game-manager.js";
 
 export var GUILD_CACHE = {}; //because querying the db every min is bad (cannot cache on node js firebase it seems)
 
@@ -15,6 +14,16 @@ export default async function init(client)
   //store them in the db
   await Promise.all(guilds.map( async (guild) => 
   { 
+    await init_guild(guild);
+  })
+  );;
+  //console.log("Done awaiting all guilds"); 
+}
+
+export async function init_guild(guild)
+{
+  if (guild.client.isMain)
+  {
     //load guild info
     await guild.fetch();
     (await guildsCollection.doc(guild.id)).set({    
@@ -23,19 +32,36 @@ export default async function init(client)
 
     //cache the info (reduce firebase reads)
     GUILD_CACHE[guild.id] = guild;//{}
+  }
     
-    //wipe all the commands (they get generated again by the init functions)
-    await unregisterAllCommandsIfNecessary(guild);
-    
-    //FLAG: run per-guild init functions
-    //await init_X(guild);
+  //wipe all the commands (they get generated again by the init functions)
+  await unregisterAllCommandsIfNecessary(guild);
+  
+  //FLAG: run per-guild init functions
+  //await init_X(guild);
 
-    console.log("Initialised Guild",guild.name, guild.id);
-  })
-  );;
-  console.log("Done awaiting all guilds"); 
+  console.log("Initialised Guild",guild.name, guild.id);
 }
 
+
+export async function checkGuildHasAllPlayers(guild)
+{
+  try
+  {
+    await getClient().guilds.fetch(guild.id) != null;
+  }
+  catch(DiscordAPIError){ return false; }
+
+  let playerAccountsPresent = await Promise.all(getPlayerClients().map(async function(playerClient) {
+    try
+    {
+      return await playerClient.guilds.fetch(guild.id) != null;
+    }
+    catch (DiscordAPIError) { return false; }
+  }));
+  
+  return playerAccountsPresent.every(b => b);
+} 
 
 
 
