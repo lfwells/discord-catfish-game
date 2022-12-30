@@ -1,3 +1,4 @@
+/*
 import crypto from 'crypto';
 import { oauth } from '../_oauthDiscord.js';
 
@@ -49,3 +50,4 @@ export async function logout(req,res)
     req.session.auth = null;
     res.redirect("/");
 }
+*/

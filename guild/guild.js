@@ -4,8 +4,6 @@ import { guildsCollection } from "../core/database.js";
 
 import { getClient } from "../core/client.js";
 import { unregisterAllCommandsIfNecessary } from "./commands.js";
-import { init_roles } from "../roles/roles.js";
-import { init_events } from "../events/events.js";
 
 export var GUILD_CACHE = {}; //because querying the db every min is bad (cannot cache on node js firebase it seems)
 

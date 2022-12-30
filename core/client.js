@@ -1,30 +1,80 @@
 import { Client, Intents } from 'discord.js';
-const client = new Client({ 
-    intents: [ 
-        Intents.FLAGS.GUILDS, 
-        //Intents.FLAGS.GUILD_INVITES, 
-        Intents.FLAGS.GUILD_MEMBERS, 
-        Intents.FLAGS.GUILD_MESSAGE_REACTIONS, 
-        Intents.FLAGS.GUILD_PRESENCES,
-        Intents.FLAGS.GUILD_MESSAGES, 
-        Intents.FLAGS.GUILD_VOICE_STATES,
-        Intents.FLAGS.GUILD_SCHEDULED_EVENTS,
-        Intents.FLAGS.DIRECT_MESSAGES,
-    ],partials: ["CHANNEL"],
-    fetchAllMembers: true
-});
-//https://discord.com/api/oauth2/authorize?client_id=978162562468282378&permissions=1505921923442&scope=bot%20applications.commands
-export function getClient() { return client };
+import * as botTokens from '../bot_tokens.js';
+import init_guilds from "../guild/guild.js";
 
+function createClient(botInfo, isMain)
+{
+    let client = new Client({ 
+        intents: [ 
+            Intents.FLAGS.GUILDS, 
+            //Intents.FLAGS.GUILD_INVITES, 
+            Intents.FLAGS.GUILD_MEMBERS, 
+            Intents.FLAGS.GUILD_MESSAGE_REACTIONS, 
+            //Intents.FLAGS.GUILD_PRESENCES,
+            Intents.FLAGS.GUILD_MESSAGES, 
+            Intents.FLAGS.GUILD_VOICE_STATES,
+            Intents.FLAGS.GUILD_SCHEDULED_EVENTS,
+            Intents.FLAGS.DIRECT_MESSAGES,
+        ],partials: ["CHANNEL"],
+        fetchAllMembers: true,
+    });
+    client.botInfo = botInfo;
+    client.isMain = isMain ?? false;
+
+    client.on('ready', async () => 
+    {
+        //await init_db(); 
+
+        console.log(`Logged in as ${client.user.tag}!`);
+
+        //save all the guilds etc to db
+        await init_guilds(client);
+        await init_client(client);
+    });
+
+    return client;
+} 
+
+let client = null;
+let playerClients = [];
+export async function loginAllClients()
+{
+    client = createClient(botTokens.MAIN_TOKEN, true);
+    playerClients = botTokens.TOKENS.map(createClient);
+    await loginClient(getClient());
+    for (var i = 0; i < playerClients.length; i++)
+    {
+        await loginClient(getPlayerClient(i));
+    }
+
+    while (client.isReady() == false || playerClients.every(c => c.isReady()) == false)
+    {
+        await new Promise(r => setTimeout(r, 500));
+    }
+    
+    await new Promise(r => setTimeout(r, 1000));
+    console.log('\u0007');
+    console.log("---------\nREADY\n---------"); 
+}
+async function loginClient(client)
+{
+    console.log("Logging in to Discord...");  
+    client.login(client.botInfo.secret).catch(reason => {
+
+        console.log("Login failed: " + reason);
+        console.log("Token used: " + client.botInfo.secret);
+
+    }); 
+} 
+
+
+
+export function getClient() { return client };
+export function getPlayerClient(playerID) { return playerClients[playerID]; }
 
 import { init_application_commands, init_interaction_cache } from '../guild/commands.js';
-import init_voice_events from "../voice/events.js";
-import init_role_events from "../roles/events.js";
-import { createOAuthLink } from './login.js';
-import { init_events_client } from '../events/events.js';
+//import { createOAuthLink } from './login.js';
 
-
-var activityInterval;
 export async function init_client(client)
 {
     console.log("Begin init_client...");
@@ -39,7 +89,7 @@ export async function init_client(client)
 
     console.log("End init_client.");
 
-    createOAuthLink();
+    //createOAuthLink();
 }
 
 
