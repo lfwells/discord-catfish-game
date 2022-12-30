@@ -1,6 +1,6 @@
 import { Client, Intents } from 'discord.js';
 import * as botTokens from '../bot_tokens.js';
-import init_guilds from "../guild/guild.js";
+import init_guilds, { checkGuildHasAllPlayers } from "../guild/guild.js";
 
 function createClient(botInfo)
 {
@@ -54,6 +54,8 @@ export async function loginAllClients()
     await new Promise(r => setTimeout(r, 1000));
     console.log('\u0007');
     console.log("---------\nREADY\n---------"); 
+
+    checkGuildHasAllPlayers(await client.guilds.fetch("1058493982923051099"));
 }
 async function loginClient(client)
 {
@@ -69,6 +71,7 @@ async function loginClient(client)
 
 export function getClient() { return client };
 export function getPlayerClient(playerID) { return playerClients[playerID]; }
+export function getPlayerClients() { return playerClients; }
 export function isMainClient(client)
 {
     return client.application.id == getClient().application.id;

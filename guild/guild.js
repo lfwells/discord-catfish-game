@@ -2,7 +2,7 @@ import admin from "firebase-admin";
 
 import { guildsCollection } from "../core/database.js";
 
-import { getClient } from "../core/client.js";
+import { getClient, getPlayerClient, getPlayerClients } from "../core/client.js";
 import { unregisterAllCommandsIfNecessary } from "./commands.js";
 import { init_game_manager } from "../game-manager/game-manager.js";
 
@@ -42,6 +42,26 @@ export async function init_guild(guild)
 
   console.log("Initialised Guild",guild.name, guild.id);
 }
+
+
+export async function checkGuildHasAllPlayers(guild)
+{
+  try
+  {
+    await getClient().guilds.fetch(guild.id) != null;
+  }
+  catch(DiscordAPIError){ return false; }
+
+  let playerAccountsPresent = await Promise.all(getPlayerClients().map(async function(playerClient) {
+    try
+    {
+      return await playerClient.guilds.fetch(guild.id) != null;
+    }
+    catch (DiscordAPIError) { return false; }
+  }));
+  
+  return playerAccountsPresent.every(b => b);
+} 
 
 
 
