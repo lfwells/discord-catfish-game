@@ -11,3 +11,5 @@ users.js
 .DS_Store
 .vscode/sftp.json
 *_oauth*.js
+
+dist
